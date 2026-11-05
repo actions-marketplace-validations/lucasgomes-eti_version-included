@@ -6,7 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `version-included` is a Rust CLI (binary `versinc`) that calculates the next SemVer version from git
 history. It is read-only: it never creates tags or commits. Rust edition 2024, Apache-2.0. The
-README documents user-facing behavior; keep it in sync as features land.
+README is a short overview; the full documentation is an mdbook in `docs/` (articles in
+`docs/src/`, ordered by `docs/src/SUMMARY.md`), which oranda will publish as the project site. Keep
+both in sync as features land. Link between articles with relative `.md` links, and to repository
+files with absolute GitHub URLs, since those files are outside the book.
 
 ## Architecture
 
@@ -38,7 +41,14 @@ cargo test <name>           # run tests whose name matches <name>
 cargo fmt                   # format
 cargo clippy --all-targets  # lint
 cargo llvm-cov              # tests with coverage summary (needs cargo-llvm-cov + llvm-tools)
+oranda dev                  # preview the site at http://127.0.0.1:7979/version-included/ (oranda 0.6.5)
 ```
+
+The site is configured in `oranda.json` and built into `public/` (ignored, like mdbook's
+intermediate `docs/book/`). README images go in `static/`, and the README links to articles by
+their published URLs (`https://lucasgomes-eti.github.io/version-included/book/<article>.html`),
+since oranda doesn't rewrite relative links. `site.yml` deploys the site to GitHub Pages; dist
+calls it after each release via `post-announce-jobs`.
 
 CI (`.github/workflows/ci.yml`) runs fmt, clippy with `-D warnings`, and the tests under
 `cargo llvm-cov` on Linux only, prints this repo's own version with `versinc` built from the
@@ -49,7 +59,8 @@ which starts dist's `release.yml`. `release.yml` is generated: edit `dist-worksp
 
 The public GitHub Action (`action.yml`, composite) is a separate concern from this repo's own
 workflows. It installs a released binary; its `version` input default is marked
-`# x-release-version` and rewritten by the Release job in each `chore(release)` commit.
+`# x-release-version` and rewritten by the Release job in each `chore(release)` commit, along with
+the `version-included@vX.Y.Z` pins in `README.md` and `docs/src/github-action.md`.
 `action-test.yml` tests it on PRs and pushes, and dist calls it after each release via
 `post-announce-jobs`.
 
